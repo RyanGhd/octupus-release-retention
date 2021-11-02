@@ -10,7 +10,7 @@ namespace Release.Retention.Services
 {
     public class KeepLatestRetentionRule : IRetentionRule
     {
-        public Task<IEnumerable<AppRelease>> SelectReleasesToKeepAsync(IEnumerable<AppRelease> releases, int numberOfReleasesToKeep = 1)
+        public Task<IEnumerable<AppRelease>> SelectReleasesToKeepAsync(IEnumerable<AppRelease> releases, int numberOfReleasesToKeep)
         {
             if (numberOfReleasesToKeep == 0 || releases == null || !releases.Any())
                 return Task.FromResult(new List<AppRelease>() as IEnumerable<AppRelease>);
