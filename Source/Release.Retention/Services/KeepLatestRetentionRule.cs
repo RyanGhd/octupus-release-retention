@@ -10,17 +10,18 @@ namespace Release.Retention.Services
 {
     public class KeepLatestRetentionRule : IRetentionRule
     {
-        public Task<IEnumerable<AppRelease>> SelectReleasesToKeepAsync(IEnumerable<AppRelease> releases)
+        public Task<IEnumerable<AppRelease>> SelectReleasesToKeepAsync(IEnumerable<AppRelease> releases, int numberOfReleasesToKeep = 1)
         {
-            if (releases == null || !releases.Any())
+            if (numberOfReleasesToKeep == 0 || releases == null || !releases.Any())
                 return Task.FromResult(new List<AppRelease>() as IEnumerable<AppRelease>);
 
             var releaseList = releases.ToList();
 
             var latestReleases =
                 releaseList.GroupBy(r => (r.ProjectId, r.Deployment.Environment.Id))
-                           .Select(grp =>
-                                        grp.Aggregate((first, second) => first.Deployment.DeployedAt > second.Deployment.DeployedAt ? first : second));
+                           .SelectMany(grp =>
+                                        grp.OrderByDescending(d => d.Deployment.DeployedAt)
+                                           .Take(numberOfReleasesToKeep));
 
             return Task.FromResult(latestReleases);
         }

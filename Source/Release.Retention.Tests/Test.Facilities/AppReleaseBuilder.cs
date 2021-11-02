@@ -36,17 +36,21 @@ namespace Release.Retention.Test.Facilities
             return this;
         }
 
-        public AppReleaseBuilder WithDeploymentCreated(DateTime created)
+        public AppReleaseBuilder WithDeployedAt(DateTime created)
         {
             Deployment = new AppDeployment(Deployment.Id, Deployment.ReleaseId, Deployment.Environment, created);
-
             return this;
         }
 
         public AppReleaseBuilder WithProjectId(string projectId)
         {
             ProjectId = projectId;
+            return this;
+        }
 
+        public AppReleaseBuilder WithEnvironment(ReleaseEnvironment env)
+        {
+            Deployment = new AppDeployment(Deployment.Id, Deployment.ReleaseId, env, Deployment.DeployedAt);
             return this;
         }
 

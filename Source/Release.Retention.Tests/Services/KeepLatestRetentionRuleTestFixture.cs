@@ -30,9 +30,13 @@ namespace Release.Retention.Services
 
                 var data = new List<object[]>
                 {
-                    new object[]{dt,dt},
-                    new object[]{dt.AddDays(1),dt},
-                    new object[]{dt,dt.AddDays(1)},
+                    new object[]{dt,dt,1},
+                    new object[]{dt.AddDays(1),dt,1},
+                    new object[]{dt,dt.AddDays(1),1},
+
+                    new object[]{dt,dt,2},
+                    new object[]{dt.AddDays(1),dt,2},
+                    new object[]{dt,dt.AddDays(1),2},
                 };
 
                 return data;
