@@ -5,6 +5,6 @@ namespace Release.Retention.Domain.Model.Service.Contracts
 {
     public interface IFileReader
     {
-        Task<string> ReadAsync();
+        Task<string> ReadAsync(string path);
     }
 }
