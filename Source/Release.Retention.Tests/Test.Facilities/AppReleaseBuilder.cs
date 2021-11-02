@@ -19,7 +19,7 @@ namespace Release.Retention.Test.Facilities
 
         public AppReleaseBuilder Start()
         {
-            Id = "r-1";
+            Id = Guid.NewGuid().ToString();
             ProjectId = "proj-1";
             Version = "v1";
             Created = DateTime.Now.AddDays(-10);
@@ -42,7 +42,14 @@ namespace Release.Retention.Test.Facilities
 
             return this;
         }
-      
+
+        public AppReleaseBuilder WithProjectId(string projectId)
+        {
+            ProjectId = projectId;
+
+            return this;
+        }
+
         public AppRelease Build()
         {
             return new AppRelease(Id, ProjectId, Version, Created, Deployment);

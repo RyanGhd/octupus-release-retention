@@ -17,10 +17,10 @@ namespace Release.Retention.Services
 
             var releaseList = releases.ToList();
 
-            var latestReleases = 
+            var latestReleases =
                 releaseList.GroupBy(r => (r.ProjectId, r.Deployment.Environment.Id))
-                           .Select(grp => 
-                                        grp.Aggregate((first, second) => first.Created > second.Created ? first : second));
+                           .Select(grp =>
+                                        grp.Aggregate((first, second) => first.Deployment.DeployedAt > second.Deployment.DeployedAt ? first : second));
 
             return Task.FromResult(latestReleases);
         }
