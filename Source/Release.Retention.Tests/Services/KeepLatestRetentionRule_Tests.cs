@@ -50,7 +50,6 @@ namespace Release.Retention.Services
 
             // assert
             Assert.Empty(result);
-
         }
 
         [Theory]
@@ -79,7 +78,13 @@ namespace Release.Retention.Services
             releases.Reverse();
             var expected = releases.Take(numberOfReleasesToKeep).ToList();
 
-            expected.ForEach(e => Assert.Contains(e, resultList));
+            expected.ForEach(e =>
+            {
+                var (release, reason) = resultList.FirstOrDefault(r => r.Release.Id.Equals(e.Id));
+                Assert.NotNull(release);
+                Assert.True(reason.Equals(string.Format(ReasonMessage.MessageFormat, e.LatestDeploymentsPerEnvironment.First().Environment.Id)));
+            });
+
             Assert.True(resultList.Count() == numberOfReleasesToKeep);
         }
 
@@ -90,14 +95,15 @@ namespace Release.Retention.Services
         {
             // arrange 
             var dt = new DateTime(2000, 2, 1);
+            var e1 = new AppEnvironment("e-1", "e-1");
 
-            var r1 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p1").WithDeployedAt(dt.AddDays(1)).Build();
-            var r2 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p1").WithDeployedAt(dt.AddDays(2)).Build();
-            var r3 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p1").WithDeployedAt(dt.AddDays(3)).Build();
+            var r1 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p1").WithEnvironment(e1,e1,e1).WithDeployedAt(dt.AddDays(1)).Build();
+            var r2 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p1").WithEnvironment(e1, e1, e1).WithDeployedAt(dt.AddDays(2)).Build();
+            var r3 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p1").WithEnvironment(e1, e1, e1).WithDeployedAt(dt.AddDays(3)).Build();
 
-            var r4 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p2").WithDeployedAt(dt.AddDays(1)).Build();
-            var r5 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p2").WithDeployedAt(dt.AddDays(2)).Build();
-            var r6 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p2").WithDeployedAt(dt.AddDays(3)).Build();
+            var r4 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p2").WithEnvironment(e1, e1, e1).WithDeployedAt(dt.AddDays(1)).Build();
+            var r5 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p2").WithEnvironment(e1, e1, e1).WithDeployedAt(dt.AddDays(2)).Build();
+            var r6 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p2").WithEnvironment(e1, e1, e1).WithDeployedAt(dt.AddDays(3)).Build();
 
             var releases = new List<AppRelease> { r1, r2, r3, r4, r5, r6 };
 
@@ -113,7 +119,12 @@ namespace Release.Retention.Services
             if (numberOfReleasesToKeep == 2)
                 expected.AddRange(new[] { r2, r5 });
 
-            expected.ForEach(e => Assert.Contains(e, resultList));
+            expected.ForEach(e =>
+            {
+                var (release, reason) = resultList.FirstOrDefault(r => r.Release.Id.Equals(e.Id));
+                Assert.NotNull(release);
+                Assert.True(reason.Equals(string.Format(ReasonMessage.MessageFormat, e.LatestDeploymentsPerEnvironment.First().Environment.Id)));
+            });
 
             Assert.True(resultList.Count == expected.Count);
         }
@@ -125,17 +136,17 @@ namespace Release.Retention.Services
         {
             // arrange 
             var dt = new DateTime(2000, 2, 1);
-            var env1 = new ReleaseEnvironment("1", "one");
-            var env2 = new ReleaseEnvironment("2", "two");
-            var env3 = new ReleaseEnvironment("3", "three");
+            var env1 = new AppEnvironment("1", "one");
+            var env2 = new AppEnvironment("2", "two");
+            var env3 = new AppEnvironment("3", "three");
 
-            var r1 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p1").WithEnvironment(env1).WithDeployedAt(dt.AddDays(1)).Build();
-            var r2 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p1").WithEnvironment(env2).WithDeployedAt(dt.AddDays(2)).Build();
-            var r3 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p1").WithEnvironment(env3).WithDeployedAt(dt).Build();
+            var r1 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p1").WithEnvironment(env1, env1, env1).WithDeployedAt(dt.AddDays(1)).Build();
+            var r2 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p1").WithEnvironment(env2, env2, env2).WithDeployedAt(dt.AddDays(2)).Build();
+            var r3 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p1").WithEnvironment(env3, env3, env3).WithDeployedAt(dt).Build();
 
-            var r4 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p2").WithEnvironment(env1).WithDeployedAt(dt.AddDays(1)).Build();
-            var r5 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p2").WithEnvironment(env2).WithDeployedAt(dt.AddDays(2)).Build();
-            var r6 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p2").WithEnvironment(env3).WithDeployedAt(dt).Build();
+            var r4 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p2").WithEnvironment(env1, env1, env1).WithDeployedAt(dt.AddDays(1)).Build();
+            var r5 = fixture.DataBuilder.Start().WithReleaseCreated(secondCreatedDate).WithProjectId("p2").WithEnvironment(env2, env2, env2).WithDeployedAt(dt.AddDays(2)).Build();
+            var r6 = fixture.DataBuilder.Start().WithReleaseCreated(firstCreatedDate).WithProjectId("p2").WithEnvironment(env3, env3, env3).WithDeployedAt(dt).Build();
 
             var releases = new List<AppRelease> { r1, r2, r3, r4, r5, r6 };
 
@@ -147,10 +158,40 @@ namespace Release.Retention.Services
             var resultList = result.ToList();
 
             // assert
-            releases.ForEach(e => Assert.Contains(e, resultList));
+            releases.ForEach(e =>
+            {
+                var (release, reason) = resultList.FirstOrDefault(r => r.Release.Id.Equals(e.Id));
+                Assert.NotNull(release);
+                Assert.True(reason.Equals(string.Format(ReasonMessage.MessageFormat, e.LatestDeploymentsPerEnvironment.First().Environment.Id)));
+            });
+
             Assert.True(resultList.Count == releases.Count);
         }
 
+        [Fact]
+        public async Task
+            Service_merge_the_reasons_if_one_release_is_kept_due_to_being_the_lastest_in_multiple_environments()
+        {
+            // arrange 
+            var dt = new DateTime(2000, 2, 1);
+            var env1 = new AppEnvironment("1", "one");
+            var env2 = new AppEnvironment("2", "two");
+            var env3 = new AppEnvironment("3", "three");
 
+            var r1 = fixture.DataBuilder.Start().WithEnvironment(env1, env2, env3).Build();
+
+            var sut = new KeepLatestRetentionRule();
+
+            var reason =  @$"kept because it was the most recently deployed to 1{Environment.NewLine}kept because it was the most recently deployed to 2{Environment.NewLine}kept because it was the most recently deployed to 3";
+
+            // act
+            var result = await sut.SelectReleasesToKeepAsync(new []{r1}, 1);
+
+            var resultList = result.ToList();
+
+            // assert 
+            Assert.True(resultList.Count==1);
+            Assert.Equal(resultList[0].Reason,reason);
+        }
     }
 }

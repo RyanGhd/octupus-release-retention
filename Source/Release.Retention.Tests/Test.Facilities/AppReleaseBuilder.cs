@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using Release.Retention.Domain.Model.Objects;
 
@@ -10,7 +11,7 @@ namespace Release.Retention.Test.Facilities
         string ProjectId { get; set; }
         string Version { get; set; }
         DateTime Created { get; set; }
-        AppDeployment Deployment { get; set; }
+        List<AppDeployment> Deployments { get; set; }
 
         public AppReleaseBuilder()
         {
@@ -24,8 +25,14 @@ namespace Release.Retention.Test.Facilities
             Version = "v1";
             Created = DateTime.Now.AddDays(-10);
 
-            Deployment = new AppDeployment("d1", "r-1", new ReleaseEnvironment("env-1", "env one"),
-                DateTime.Now.AddDays(-9));
+            var env = new AppEnvironment("env-1", "env one");
+
+            Deployments = new List<AppDeployment>
+            {
+                new AppDeployment("d-1", "r-1", env, DateTime.Now.AddDays(-7)),
+                new AppDeployment("d-2", "r-1", env, DateTime.Now.AddDays(-8)),
+                new AppDeployment("d-3", "r-1", env, DateTime.Now.AddDays(-9)),
+            };
 
             return this;
         }
@@ -36,9 +43,13 @@ namespace Release.Retention.Test.Facilities
             return this;
         }
 
-        public AppReleaseBuilder WithDeployedAt(DateTime created)
+        public AppReleaseBuilder WithDeployedAt(params DateTime[] deployedAt)
         {
-            Deployment = new AppDeployment(Deployment.Id, Deployment.ReleaseId, Deployment.Environment, created);
+            for (int i = 0; i < deployedAt.Length && i < Deployments.Count; i++)
+            {
+                Deployments[i] = new AppDeployment(Deployments[i].Id, Deployments[i].ReleaseId, Deployments[i].Environment, deployedAt[i]);
+            }
+
             return this;
         }
 
@@ -48,15 +59,25 @@ namespace Release.Retention.Test.Facilities
             return this;
         }
 
-        public AppReleaseBuilder WithEnvironment(ReleaseEnvironment env)
+        public AppReleaseBuilder WithNoDeployment()
         {
-            Deployment = new AppDeployment(Deployment.Id, Deployment.ReleaseId, env, Deployment.DeployedAt);
+            Deployments = null;
+            return this;
+        }
+
+        public AppReleaseBuilder WithEnvironment(params AppEnvironment[] environment)
+        {
+            for (int i = 0; i < environment.Length && i < Deployments.Count; i++)
+            {
+                Deployments[i] = new AppDeployment(Deployments[i].Id, Deployments[i].ReleaseId, environment[i], Deployments[i].DeployedAt);
+            }
+
             return this;
         }
 
         public AppRelease Build()
         {
-            return new AppRelease(Id, ProjectId, Version, Created, Deployment);
+            return new AppRelease(Id, ProjectId, Version, Created, Deployments);
         }
     }
 }
